@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<title>LockGuard removed</title>
+<style>
+  body { font-family: -apple-system, sans-serif; background: #0f0f12; color: #eee; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+  .card { text-align: center; max-width: 420px; padding: 32px; }
+  h1 { font-size: 20px; }
+  p { color: #999; font-size: 14px; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1 id="heading">Letting your partner know...</h1>
+    <p id="detail">One sec.</p>
+  </div>
+
+  <script>
+    // Fill these in — this page is hosted standalone (e.g. GitHub Pages),
+    // so it can't load extension/config.js.
+    const SUPABASE_URL = "https://YOUR-PROJECT-REF.supabase.co";
+    const SUPABASE_ANON_KEY = "YOUR-ANON-KEY";
+    const NOTIFY_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/notify`;
+
+    const params = new URLSearchParams(location.search);
+    const userId = params.get("user_id");
+    const heading = document.getElementById("heading");
+    const detail = document.getElementById("detail");
+
+    if (!userId) {
+      heading.textContent = "LockGuard removed";
+      detail.textContent = "No user id was provided, so no notification was sent.";
+    } else {
+      fetch(NOTIFY_FUNCTION_URL, {
+        method: "POST",
+        headers: {
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ type: "extension_removed", user_id: userId }),
+      })
+        .then((res) => {
+          heading.textContent = res.ok ? "Your partner has been notified" : "LockGuard removed";
+          detail.textContent = res.ok
+            ? "They'll get an email letting them know the extension was uninstalled."
+            : "Something went wrong sending the notification.";
+        })
+        .catch(() => {
+          heading.textContent = "LockGuard removed";
+          detail.textContent = "Could not reach the server to notify your partner.";
+        });
+    }
+  </script>
+</body>
+</html>
